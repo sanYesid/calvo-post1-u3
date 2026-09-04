@@ -16,6 +16,10 @@ public class AdaptadorQRCheck implements ServicioAsistencia {
 
     @Override
     public ResultadoCheckIn registrarAsistencia(String eventoId, String participanteId, String credencialQR) {
+        if (credencialQR == null || !credencialQR.startsWith("QR-")) {
+            return new ResultadoCheckIn(false, "Credencial QR no válida");
+        }
+
         long idEventoParsed;
         try {
             idEventoParsed = Long.parseLong(eventoId.replaceAll("\\D+", ""));
@@ -24,9 +28,7 @@ public class AdaptadorQRCheck implements ServicioAsistencia {
             idEventoParsed = 1L;
         }
 
-        String payload = credencialQR.startsWith("QR-") ? credencialQR : "QR-" + credencialQR;
-
-        QRCheckRequest request = new QRCheckRequest(payload, idEventoParsed);
+        QRCheckRequest request = new QRCheckRequest(credencialQR, idEventoParsed);
         QRCheckResponse response = qrCheckClient.validar(request);
 
         boolean esExitoso = response.getCodigoRespuesta() == 200;
